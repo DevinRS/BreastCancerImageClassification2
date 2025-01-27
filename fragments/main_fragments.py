@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 import os
 from PIL import Image
+import matplotlib.pyplot as plt
 
 # -- Helper Functions --
 import cv2
@@ -202,11 +203,13 @@ def ER_prediction():
         with st.spinner("Running Cell Counting Module..."):
             if st.session_state.image_selection_upload is not None:
                 uploaded_image = st.session_state.image_selection_upload
+                actual_label = "Unknown"
             else:
                 # load the selected image from the gallery
                 for img in st.session_state.ER_image_array:
                     if st.session_state.image_selection_gallery == img["title"]:
                         uploaded_image = img["img"]
+                        actual_label = img["title"].split('_')[2]
                         break
             cell_count, gray, blur, canny, dilated, rgb = canny_count(Image.open(uploaded_image), show_img=True)
             st.write("Original Image: ")
@@ -242,23 +245,33 @@ def ER_prediction():
                     output = model(image_tensor)
                     prediction = torch.argmax(output, dim=1).item()
                     prob = torch.nn.functional.softmax(output, dim=1)[0].tolist()
-                st.write(f"Prediction: {'Positive' if prediction == 1 else 'Negative'}")
-                st.write(f"Probability: {prob}")
+                # display the image in matplotlib with the title: "Prediction: {prediction}, Actual: {actual_label} Probability: {prob}"
+                plt.figure(figsize=(6, 6))
+                plt.imshow(image)
+                plt.title(f"Prediction: {'POSITIVE' if prediction == 1 else 'NEGATIVE'}\nActual: {actual_label}\nProbability: {round(prob[0],3) if prediction == 0 else round(prob[1],3)}")
+                plt.axis('off')
+                st.pyplot(plt, use_container_width=True)
+
+
         with col2:
             with st.spinner("Running Model with Cell Count..."):
                 model_cellcount = load_ER_model()
                 model_cellcount = ConvNextWithCellCount(base_model=model, cell_count_dim=1, num_classes=2)
                 model_cellcount.load_state_dict(torch.load('assets/ER_weight_cellcount.pth', weights_only=True, map_location=torch.device('cpu')))
                 model_cellcount.eval()
-                st.success("CNN Model with Cell Count Successfully Loaded")
+                st.success("CNN Model w/ Cell Count Successfully Loaded")
                 # normalize cell count Cell count mean: 1258.9178554993098, count std: 1139.754365120176
                 cell_count = (cell_count - 1258.9178554993098) / 1139.754365120176
                 with torch.no_grad():
                     output = model_cellcount(image_tensor, torch.tensor([cell_count]))
                     prediction = torch.argmax(output, dim=1).item()
                     prob = torch.nn.functional.softmax(output, dim=1)[0].tolist()
-                st.write(f"Prediction: {'Positive' if prediction == 1 else 'Negative'}")
-                st.write(f"Probability: {prob}")
+                # display the image in matplotlib with the title: "Prediction: {prediction}, Actual: {actual_label} Probability: {prob}"
+                plt.figure(figsize=(6, 6))
+                plt.imshow(image)
+                plt.title(f"Prediction: {'POSITIVE' if prediction == 1 else 'NEGATIVE'}\nActual: {actual_label}\nProbability: {round(prob[0],3) if prediction == 0 else round(prob[1],3)}")
+                plt.axis('off')
+                st.pyplot(plt, use_container_width=True)
 
 
 @st.fragment
@@ -349,11 +362,13 @@ def PR_prediction():
         with st.spinner("Running Cell Counting Module..."):
             if st.session_state.image_selection_upload is not None:
                 uploaded_image = st.session_state.image_selection_upload
+                actual_label = "Unknown"
             else:
                 # load the selected image from the gallery
                 for img in st.session_state.PR_image_array:
                     if st.session_state.image_selection_gallery == img["title"]:
                         uploaded_image = img["img"]
+                        actual_label = img["title"].split('_')[2]
                         break
             cell_count, gray, blur, canny, dilated, rgb = canny_count(Image.open(uploaded_image), show_img=True)
             st.write("Original Image: ")
@@ -389,23 +404,31 @@ def PR_prediction():
                     output = model(image_tensor)
                     prediction = torch.argmax(output, dim=1).item()
                     prob = torch.nn.functional.softmax(output, dim=1)[0].tolist()
-                st.write(f"Prediction: {'Positive' if prediction == 1 else 'Negative'}")
-                st.write(f"Probability: {prob}")
+                # display the image in matplotlib with the title: "Prediction: {prediction}, Actual: {actual_label} Probability: {prob}"
+                plt.figure(figsize=(6, 6))
+                plt.imshow(image)
+                plt.title(f"Prediction: {'POSITIVE' if prediction == 1 else 'NEGATIVE'}\nActual: {actual_label}\nProbability: {round(prob[0],3) if prediction == 0 else round(prob[1],3)}")
+                plt.axis('off')
+                st.pyplot(plt, use_container_width=True)
         with col2:
             with st.spinner("Running Model with Cell Count..."):
                 model_cellcount = load_PR_model()
                 model_cellcount = ConvNextWithCellCount(base_model=model, cell_count_dim=1, num_classes=2)
                 model_cellcount.load_state_dict(torch.load('assets/PR_weight_cellcount.pth', weights_only=True, map_location=torch.device('cpu')))
                 model_cellcount.eval()
-                st.success("CNN Model with Cell Count Successfully Loaded")
+                st.success("CNN Model w/ Cell Count Successfully Loaded")
                 # normalize cell count Cell count mean: 2211.7708333333335, count std: 1940.2254832315882
                 cell_count = (cell_count - 2211.7708333333335) / 1940.2254832315882
                 with torch.no_grad():
                     output = model_cellcount(image_tensor, torch.tensor([cell_count]))
                     prediction = torch.argmax(output, dim=1).item()
                     prob = torch.nn.functional.softmax(output, dim=1)[0].tolist()
-                st.write(f"Prediction: {'Positive' if prediction == 1 else 'Negative'}")
-                st.write(f"Probability: {prob}")
+                # display the image in matplotlib with the title: "Prediction: {prediction}, Actual: {actual_label} Probability: {prob}"
+                plt.figure(figsize=(6, 6))
+                plt.imshow(image)
+                plt.title(f"Prediction: {'POSITIVE' if prediction == 1 else 'NEGATIVE'}\nActual: {actual_label}\nProbability: {round(prob[0],3) if prediction == 0 else round(prob[1],3)}")
+                plt.axis('off')
+                st.pyplot(plt, use_container_width=True)
 
 
 @st.fragment
@@ -496,11 +519,13 @@ def Ki_prediction():
         with st.spinner("Running Cell Counting Module..."):
             if st.session_state.image_selection_upload is not None:
                 uploaded_image = st.session_state.image_selection_upload
+                actual_label = "Unknown"
             else:
                 # load the selected image from the gallery
                 for img in st.session_state.Ki_image_array:
                     if st.session_state.image_selection_gallery == img["title"]:
                         uploaded_image = img["img"]
+                        actual_label = img["title"].split('_')[2]
                         break
             cell_count, gray, blur, canny, dilated, rgb = canny_count(Image.open(uploaded_image), show_img=True)
             st.write("Original Image: ")
@@ -536,23 +561,31 @@ def Ki_prediction():
                     output = model(image_tensor)
                     prediction = torch.argmax(output, dim=1).item()
                     prob = torch.nn.functional.softmax(output, dim=1)[0].tolist()
-                st.write(f"Prediction: {'LOW' if prediction == 1 else 'HIGH'}")
-                st.write(f"Probability: {prob}")
+                # display the image in matplotlib with the title: "Prediction: {prediction}, Actual: {actual_label} Probability: {prob}"
+                plt.figure(figsize=(6, 6))
+                plt.imshow(image)
+                plt.title(f"Prediction: {'LOW' if prediction == 1 else 'HIGH'}\nActual: {actual_label}\nProbability: {round(prob[0],3) if prediction == 0 else round(prob[1],3)}")
+                plt.axis('off')
+                st.pyplot(plt, use_container_width=True)
         with col2:
             with st.spinner("Running Model with Cell Count..."):
                 model_cellcount = load_PR_model()
                 model_cellcount = ConvNextWithCellCount(base_model=model, cell_count_dim=1, num_classes=2)
                 model_cellcount.load_state_dict(torch.load('assets/Ki67_weight_cellcount.pth', weights_only=True, map_location=torch.device('cpu')))
                 model_cellcount.eval()
-                st.success("CNN Model with Cell Count Successfully Loaded")
+                st.success("CNN Model w/ Cell Count Successfully Loaded")
                 # normalize cell count Cell count mean: 2211.7708333333335, count std: 1940.2254832315882
                 cell_count = (cell_count - 2211.7708333333335) / 1940.2254832315882
                 with torch.no_grad():
                     output = model_cellcount(image_tensor, torch.tensor([cell_count]))
                     prediction = torch.argmax(output, dim=1).item()
                     prob = torch.nn.functional.softmax(output, dim=1)[0].tolist()
-                st.write(f"Prediction: {'LOW' if prediction == 1 else 'HIGH'}")
-                st.write(f"Probability: {prob}")
+                # display the image in matplotlib with the title: "Prediction: {prediction}, Actual: {actual_label} Probability: {prob}"
+                plt.figure(figsize=(6, 6))
+                plt.imshow(image)
+                plt.title(f"Prediction: {'LOW' if prediction == 1 else 'HIGH'}\nActual: {actual_label}\nProbability: {round(prob[0],3) if prediction == 0 else round(prob[1],3)}")
+                plt.axis('off')
+                st.pyplot(plt, use_container_width=True)
 
 
 @st.fragment
@@ -605,18 +638,28 @@ def HER_image_selection():
     with col1:
         st.image(HER_image_array[0]["img"], use_container_width=True)
         st.write(HER_image_array[0]["title"])
-    with col2:
         st.image(HER_image_array[1]["img"], use_container_width=True)
         st.write(HER_image_array[1]["title"])
-    with col3:
+    with col2:
         st.image(HER_image_array[2]["img"], use_container_width=True)
         st.write(HER_image_array[2]["title"])
-    with col4:
         st.image(HER_image_array[3]["img"], use_container_width=True)
         st.write(HER_image_array[3]["title"])
-    with col5:
+    with col3:
         st.image(HER_image_array[4]["img"], use_container_width=True)
         st.write(HER_image_array[4]["title"])
+        st.image(HER_image_array[5]["img"], use_container_width=True)
+        st.write(HER_image_array[5]["title"])
+    with col4:
+        st.image(HER_image_array[6]["img"], use_container_width=True)
+        st.write(HER_image_array[6]["title"])
+        st.image(HER_image_array[7]["img"], use_container_width=True)
+        st.write(HER_image_array[7]["title"])
+    with col5:
+        st.image(HER_image_array[8]["img"], use_container_width=True)
+        st.write(HER_image_array[8]["title"])
+        st.image(HER_image_array[9]["img"], use_container_width=True)
+        st.write(HER_image_array[9]["title"])
 
     col1, col2 = st.columns((1, 2))
     with col1:
@@ -633,11 +676,13 @@ def HER_prediction():
         with st.spinner("Running Cell Counting Module..."):
             if st.session_state.image_selection_upload is not None:
                 uploaded_image = st.session_state.image_selection_upload
+                actual_label = "Unknown"
             else:
                 # load the selected image from the gallery
                 for img in st.session_state.HER_image_array:
                     if st.session_state.image_selection_gallery == img["title"]:
                         uploaded_image = img["img"]
+                        actual_label = img["title"].split('_')[2]
                         break
             cell_area, gray, binary_mask = process_image(Image.open(uploaded_image), show_img=True) 
             st.write("Original Image: ")
@@ -668,20 +713,28 @@ def HER_prediction():
                     output = model(image_tensor)
                     prediction = torch.argmax(output, dim=1).item()
                     prob = torch.nn.functional.softmax(output, dim=1)[0].tolist()
-                st.write(f"Prediction: {'Positive' if prediction == 1 else 'Negative'}")
-                st.write(f"Probability: {prob}")
+                # display the image in matplotlib with the title: "Prediction: {prediction}, Actual: {actual_label} Probability: {prob}"
+                plt.figure(figsize=(6, 6))
+                plt.imshow(image)
+                plt.title(f"Prediction: {'P3' if prediction == 1 else 'P1'}\nActual: {actual_label}\nProbability: {round(prob[0],3) if prediction == 0 else round(prob[1],3)}")
+                plt.axis('off')
+                st.pyplot(plt, use_container_width=True)
         with col2:
             with st.spinner("Running Model with Cell Count..."):
                 model_cellcount = load_PR_model()
                 model_cellcount = ConvNextWithCellCount(base_model=model, cell_count_dim=1, num_classes=2)
                 model_cellcount.load_state_dict(torch.load('assets/HER_weight_cellcount.pth', weights_only=True, map_location=torch.device('cpu')))
                 model_cellcount.eval()
-                st.success("CNN Model with Cell Count Successfully Loaded")
+                st.success("CNN Model w/ Cell Count Successfully Loaded")
                 # normalize cell count Cell count mean: 2211.7708333333335, count std: 1940.2254832315882
                 cell_area = (cell_area - 0.3283004405082788) / 0.17266037240662982
                 with torch.no_grad():
                     output = model_cellcount(image_tensor, torch.tensor([cell_area]))
                     prediction = torch.argmax(output, dim=1).item()
                     prob = torch.nn.functional.softmax(output, dim=1)[0].tolist()
-                st.write(f"Prediction: {'Positive' if prediction == 1 else 'Negative'}")
-                st.write(f"Probability: {prob}")
+                # display the image in matplotlib with the title: "Prediction: {prediction}, Actual: {actual_label} Probability: {prob}"
+                plt.figure(figsize=(6, 6))
+                plt.imshow(image)
+                plt.title(f"Prediction: {'P3' if prediction == 1 else 'P1'}\nActual: {actual_label}\nProbability: {round(prob[0],3) if prediction == 0 else round(prob[1],3)}")
+                plt.axis('off')
+                st.pyplot(plt, use_container_width=True)
